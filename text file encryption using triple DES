@@ -1,0 +1,153 @@
+<!-- /html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Triple DES File Encryption and Decryption</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Triple DES File Encryption and Decryption</h1>
+
+        <label for="fileInput">Select a file:</label>
+        <input type="file" id="fileInput"/><br><br>
+
+        <label for="encryptionKey">Encryption Key:</label>
+        <input type="text" id="encryptionKey"/><br><br>
+
+        <button onclick="encryptFile()">Encrypt File</button>
+        <button onclick="decryptFile()">Decrypt File</button><br><br>
+
+        <div class="result-container">
+            <label for="result">Result:</label>
+            <textarea id="result" rows="10" cols="50" readonly></textarea><br>
+            <p id="responseTime"></p>
+            <a id="downloadLink" style="display: none;" download>Download Encrypted/Decrypted File</a>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="scripts.js"></script>
+</body>
+</html>
+
+<!-- CSS Section -->
+body {
+    background-image: url('C:/Users/Vikas/OneDrive/Desktop/img1.jpg'); /* Background image */
+    background-size: cover;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container {
+    text-align: center;
+}
+
+label {
+    display: inline-block;
+    margin-bottom: 5px;
+    color: white; /* Text color */
+}
+
+input[type="file"],
+input[type="text"],
+button {
+    margin-bottom: 10px;
+}
+
+textarea {
+    margin-bottom: 20px;
+}
+
+#responseTime {
+    margin-bottom: 20px;
+}
+
+.result-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+<!-- JavaScript Section -->
+function encryptFile() {
+    const startTime = performance.now();
+
+    const fileInput = document.getElementById('fileInput');
+    const encryptionKey = document.getElementById('encryptionKey').value;
+
+    if (!fileInput.files.length) {
+        alert('Please select a file first.');
+        return;
+    }
+
+    if (!encryptionKey) {
+        alert('Please enter an encryption key.');
+        return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = function() {
+        const fileData = reader.result;
+        const encryptedData = CryptoJS.TripleDES.encrypt(fileData, encryptionKey).toString();
+        const encryptedFile = new Blob([encryptedData], { type: 'text/plain' });
+
+        const downloadLink = document.getElementById('downloadLink');
+        downloadLink.href = URL.createObjectURL(encryptedFile);
+        downloadLink.style.display = 'block';
+        downloadLink.download = fileInput.files[0].name + '.enc';
+
+        const endTime = performance.now();
+        document.getElementById('result').value = `Encrypted Cipher Text:\n${encryptedData}`;
+        document.getElementById('responseTime').textContent = `Encryption Time: ${endTime - startTime} milliseconds`;
+    };
+
+    reader.readAsText(fileInput.files[0]);
+}
+
+function decryptFile() {
+    const startTime = performance.now();
+
+    const fileInput = document.getElementById('fileInput');
+    const encryptionKey = document.getElementById('encryptionKey').value;
+
+    if (!fileInput.files.length) {
+        alert('Please select a file first.');
+        return;
+    }
+
+    if (!encryptionKey) {
+        alert('Please enter an encryption key.');
+        return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = function() {
+        const fileData = reader.result;
+        const decryptedData = CryptoJS.TripleDES.decrypt(fileData, encryptionKey).toString(CryptoJS.enc.Utf8);
+        const decryptedFile = new Blob([decryptedData], { type: 'text/plain' });
+
+        const downloadLink = document.getElementById('downloadLink');
+        downloadLink.href = URL.createObjectURL(decryptedFile);
+        downloadLink.style.display = 'block';
+        downloadLink.download = fileInput.files[0].name.replace('.enc', '');
+
+        const endTime = performance.now();
+        document.getElementById('result').value = `Decrypted Plain Text:\n${decryptedData}`;
+        document.getElementById('responseTime').textContent = `Decryption Time: ${endTime - startTime} milliseconds`;
+    };
+
+    reader.readAsText(fileInput.files[0]);
+}
+
+
